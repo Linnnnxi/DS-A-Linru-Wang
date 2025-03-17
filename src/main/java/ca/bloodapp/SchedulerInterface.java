@@ -5,9 +5,25 @@
 package ca.bloodapp;
 
 /**
+ * 15/03/2025
  *
- * @author lenovo
+ * @author Linru wang Interface for scheduler
  */
 public interface SchedulerInterface {
+
+    //checks the queue empty
+    public boolean isEmpty();
+
+    public int size();
     
+    public Object frontElement();
+    //add a patient to the queue
+    public void enqueue(Blood patient);
+
+    //remove and return the patient the front of the queue
+    public Object dequeue();
+
+
 }
+
+
