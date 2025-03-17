@@ -23,8 +23,8 @@ public class Scheduler implements SchedulerInterface {
         patientQueue = new PriorityQueue<>(new Comparator<Blood>() {
             @Override
             public int compare(Blood b1, Blood b2) {
-                //patients from a hospital ward get higher priority (1)
-                if (b1.isWard() && !b2.isWard()) {
+                //from a hospital ward get higher priority (1)
+                if (b1.isWard() && !b2.isWard()) {//if b1 is true and b2 is false
                     return -1;
                 }
 
@@ -32,14 +32,17 @@ public class Scheduler implements SchedulerInterface {
                     return 1;
                 }
 
-                //older patients get priority (2)
-                int ageComparison = Integer.compare(b2.getAge(), b1.getAge());
-                if (ageComparison != 0) {
-                    return ageComparison;
+                //age(2)
+                if (b1.getAge() != b2.getAge()) {
+                    return Integer.compare(b2.getAge(), b1.getAge());
                 }
 
-                //priority level Urgent - Medium - Low (3)
-                return Integer.compare(getPriorityValue(b1.getPriority()), getPriorityValue(b2.getPriority()));
+                //Urgent - Medium - Low (3)
+                int priorityComparison = Integer.compare(getPriorityValue(b1.getPriority()), getPriorityValue(b2.getPriority()));
+                if (priorityComparison != 0) {
+                    return priorityComparison;
+                }
+                return 0;
             }
         });
     }
@@ -58,9 +61,16 @@ public class Scheduler implements SchedulerInterface {
         }
     }
 
-    //getter for patients list
-    public List<Blood> getPatients() {
-        return new ArrayList<>(patientQueue);
+    //add a new patient
+    @Override
+    public void enqueue(Blood patient) {
+        patientQueue.add(patient);
+    }
+
+    @Override
+    //to next patient
+    public Blood dequeue() {
+        return patientQueue.poll();
     }
 
     @Override
@@ -79,16 +89,35 @@ public class Scheduler implements SchedulerInterface {
         return patientQueue.peek();
     }
 
-    //add a new patient
-    @Override
-    public void enqueue(Blood patient) {
-        patientQueue.add(patient);
-    }
+    //before displaying the patient list in GUI ensure the patient list is sorted correctly)
+    public List<Blood> getPatients() {
+        List<Blood> patientsL = new ArrayList<>(patientQueue);
 
-    @Override
-    //to next patient
-    public Blood dequeue() {
-        return patientQueue.poll();
+        //Ensure the list is correctly
+        patientsL.sort(new Comparator<Blood>() {
+            @Override
+            public int compare(Blood b1, Blood b2) {
+                //(1)
+                if (b1.isWard() && !b2.isWard()) {
+                    return -1;
+                }
+                if (!b1.isWard() && b2.isWard()) {
+                    return 1;
+                }
+                //(2)
+                if (b1.getAge() != b2.getAge()) {
+                    return Integer.compare(b2.getAge(), b1.getAge());
+                }
+                //(3)
+                return Integer.compare(getPriorityValue(b1.getPriority()), getPriorityValue(b2.getPriority()));
+            }
+        });
+        System.out.println("Patient List:");
+        for (Blood patient : patientsL) {
+            System.out.println(patient.getName() + " (Age: " + patient.getAge()
+                    + ", Priority: " + patient.getPriority()
+                    + ", Hospital ward: " + (patient.isWard() ? "Yes" : "No") + ")");
+        }
+        return patientsL;
     }
-
 }
